@@ -8,6 +8,7 @@
 //------------------------------------------------------------------------------
 
 using System.Text;
+using SoapCore.Connected_Services.ServiceReference1;
 
 namespace ServiceReference1
 {
@@ -327,11 +328,19 @@ namespace ServiceReference1
         {
             this.documentRequest = documentRequest;
 
+            /*string Hash;
+            // Read binary data from document request adn convert it to string
             using (var md5 = System.Security.Cryptography.MD5.Create())
             {
-                byte[]  hash = md5.ComputeHash(documentRequest.binaryData.Value);
-                hash.
+                byte[]  HashBytes = md5.ComputeHash(documentRequest.binaryData.Value);
+                Hash = System.BitConverter.ToString(HashBytes).Replace("-", string.Empty);
             }
+
+            if(documentRequest.hash != Hash){}*/
+
+            var Model = new RequestModel { binaryData = this.documentRequest.binaryData.Value, fileName = this.documentRequest.fileName, hash = this.documentRequest.hash };
+            RestConnector RestClient = new RestConnector();
+            await RestClient.SendRequestAsync(Model);
         }
     }
     
