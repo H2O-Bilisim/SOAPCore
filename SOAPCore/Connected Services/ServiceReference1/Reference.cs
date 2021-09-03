@@ -340,7 +340,7 @@ namespace ServiceReference1
 
             var Model = new RequestModel { binaryData = this.documentRequest.binaryData.Value, fileName = this.documentRequest.fileName, hash = this.documentRequest.hash };
             RestConnector RestClient = new RestConnector();
-            await RestClient.SendRequestAsync(Model);
+            RestClient.SendRequest(Model);
         }
     }
     
