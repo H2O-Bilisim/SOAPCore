@@ -1,4 +1,5 @@
-﻿using System;
+﻿using EfaturaFinalHandler.Models;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.ServiceModel;
@@ -6,16 +7,15 @@ using System.Threading.Tasks;
 
 namespace EfaturaFinalHandler
 {
-    public class FaturaService
+    public class FaturaService: IFaturaService
     {
-        public string Ping(string msg)
+        public ResponseModel sendDocument(DocumentModel document)
         {
-            return string.Join(string.Empty, msg.Reverse());
+            var response = new ResponseModel { hash = "TESTHASH", msg = "testMSG" };
+            return response;
+            //return string.Join(string.Empty, msg.Reverse());
         }
-        public void Pong(double s)
-        {
-            
-        }
+       
     }
 
    
@@ -23,10 +23,8 @@ namespace EfaturaFinalHandler
     public interface IFaturaService
     {
         [OperationContract]
-        string Ping(string msg);
+        ResponseModel sendDocument(DocumentModel document);
 
-        [OperationContract]
-        void Pong(string s);
     }
     
 }
