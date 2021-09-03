@@ -10,14 +10,17 @@ using System.Runtime.Serialization.Formatters.Binary;
 using System.Security.Cryptography;
 using System.ServiceModel;
 using System.Text;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace EfaturaFinalHandler
 {
     public class FaturaService : IFaturaService
     {
+        private ThreadLocal<string> _paramValue = new ThreadLocal<string>() { Value = string.Empty };
         public documentReturnType sendDocument(documentType document)
         {
+            var responseControl = "string";
             var h = new H2oServiceRequester();
             var login = h.Login();
             var response = new documentReturnType();
@@ -42,22 +45,26 @@ namespace EfaturaFinalHandler
                         foreach(var item in archive.Entries)
                         {
                             var ModelData = new Doclist();
-                            var zipfile = archive.GetEntry(item.Name);
-                            using (var zstream = item.Open())
-                            {
-                                using (var reader = new StreamReader(zstream))
-                                {
-                                    using (var memstream = new MemoryStream())
-                                    {
-                                        var buffer = new byte[512];
-                                        var bytesRead = default(int);
-                                        while ((bytesRead = reader.BaseStream.Read(buffer, 0, buffer.Length)) > 0)
-                                            memstream.Write(buffer, 0, bytesRead);
-                                       ModelData.document = memstream.ToArray();
-                                    }
-                                }
-                            }
+                            string zipfileContent = string.Empty;
+                            var zstream = new StreamReader(item.Open(), Encoding.UTF8);
+                            string ztempstr = zstream.ReadToEnd();
+                            zipfileContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(ztempstr));
+                            //using (var zstream = item.Open())
+                            //{
+                            //    using (var reader = new StreamReader(zstream))
+                            //    {
+                            //        using (var memstream = new MemoryStream())
+                            //        {
+                            //            var buffer = new byte[512];
+                            //            var bytesRead = default(int);
+                            //            while ((bytesRead = reader.BaseStream.Read(buffer, 0, buffer.Length)) > 0)
+                            //                memstream.Write(buffer, 0, bytesRead);
+                            //           ModelData.document = memstream.ToArray();
+                            //        }
+                            //    }
+                            //}
                             ModelData.name = item.FullName;
+                            ModelData.document = zipfileContent;
                             ProcessModel.doc_list.Add(ModelData);
                         }
 
@@ -66,10 +73,27 @@ namespace EfaturaFinalHandler
                 }
             }
 
+
             var ReturnOfService = h.SaveIncomingFile(ProcessModel);
+            if( ReturnOfService.GetType()  != typeof(string))
+            {
+                response.msg = "ZARF KUYRUGA EKLENDI";
+                response.hash = "";
+            }
+            else
+            {
+                response.msg = "SISTEM HATASI";
+                response.hash = "";
+            }
            
             return response;
             //return string.Join(string.Empty, msg.Reverse());
+            /*
+             * 
+             * Doc_list:
+             * filename: "name.xml"
+             * file: "base64Encodedfilecontent"
+             */
 
         }
 

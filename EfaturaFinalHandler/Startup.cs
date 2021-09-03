@@ -29,6 +29,7 @@ namespace EfaturaFinalHandler
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EfaturaFinalHandler", Version = "v1" });
             });
             services.TryAddSingleton<IFaturaService, FaturaService>();
+            services.AddSoapServiceOperationTuner(new EfaturaServiceOperationTuner());
             services.AddSoapExceptionTransformer((ex) => ex.Message);
         }
 
@@ -52,7 +53,7 @@ namespace EfaturaFinalHandler
                 //endpoints.UseSoapEndpoint<IFaturaService>("/Efatura.asmx", new SoapEncoderOptions(), SoapSerializer.XmlSerializer);
                 endpoints.MapControllers();
             });
-            app.UseSoapEndpoint<IFaturaService>(path: "/Efatura.wsdl", binding: new BasicHttpBinding());
+            app.UseSoapEndpoint<IFaturaService>(path: "/", binding: new BasicHttpBinding());
 
 
         }

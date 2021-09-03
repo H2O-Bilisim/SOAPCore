@@ -16,6 +16,6 @@ namespace EfaturaFinalHandler.Models
     public class Doclist
     {
         public string name { get; set; }
-        public byte[] document { get; set; }
+        public string document { get; set; }
     }
 }
