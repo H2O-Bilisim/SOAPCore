@@ -1,5 +1,3 @@
-using Autofac;
-using Autofac.Extensions.DependencyInjection;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.Extensions.Configuration;
@@ -28,10 +26,10 @@ namespace EfaturaFinalHandler
             services.AddControllers();
             services.AddSwaggerGen(c =>
             {
-                c.SwaggerDoc("v1", new OpenApiInfo { Title = "Efatura", Version = "v1" });
+                c.SwaggerDoc("v1", new OpenApiInfo { Title = "EfaturaFinalHandler", Version = "v1" });
             });
             services.TryAddSingleton<IFaturaService, FaturaService>();
-            
+            services.AddSoapExceptionTransformer((ex) => ex.Message);
         }
 
         // This method gets called by the runtime. Use this method to configure the HTTP request pipeline.
