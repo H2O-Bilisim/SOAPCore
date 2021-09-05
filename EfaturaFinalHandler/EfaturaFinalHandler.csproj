@@ -24,4 +24,9 @@
     <Folder Include="Library\" />
   </ItemGroup>
 
+  <ItemGroup>
+    <None Update="ServiceLogs.txt">
+      <CopyToOutputDirectory>Always</CopyToOutputDirectory>
+    </None>
+  </ItemGroup>
 </Project>

@@ -53,6 +53,7 @@ namespace EfaturaFinalHandler
                 //endpoints.UseSoapEndpoint<IFaturaService>("/Efatura.asmx", new SoapEncoderOptions(), SoapSerializer.XmlSerializer);
                 endpoints.MapControllers();
             });
+            app.UseMiddleware<RequestHandlerMiddleware>();
             app.UseSoapEndpoint<IFaturaService>(path: "/", binding: new BasicHttpBinding());
 
 
