@@ -13,12 +13,14 @@ namespace EfaturaFinalHandler
         }
         public void Logcu(string body, HttpContext context, string client)
         {
+            // X-Real-IP
+            var RealIp = context.Request.Headers["X-Real-IP"];
             
             var model = new LogginModel
             {
                 LogDate = DateTime.Now,
                 Body = body,
-                ClientIp = client,
+                ClientIp = RealIp,
                 Header = JsonConvert.SerializeObject(context.Request.Headers, Formatting.Indented),
 
             };
