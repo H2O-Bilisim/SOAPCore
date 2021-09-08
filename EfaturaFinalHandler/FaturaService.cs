@@ -20,7 +20,8 @@ namespace EfaturaFinalHandler
         private ThreadLocal<string> _paramValue = new ThreadLocal<string>() { Value = string.Empty };
         public documentReturnType sendDocument(documentType document)
         {
-            var responseControl = "string";
+            LogWriter log = new LogWriter();
+            log.Requestci(document);
             var h = new H2oServiceRequester();
             var login = h.Login();
             var response = new documentReturnType();
@@ -36,6 +37,7 @@ namespace EfaturaFinalHandler
                     {
                         response.hash = md5ComputeHash;
                         response.msg = "Incoming File Hash not MD5 Format or not Correct";
+                        log.Responscu(response);
                         return response;
                     }
 
@@ -85,7 +87,7 @@ namespace EfaturaFinalHandler
                 response.msg = "SISTEM HATASI";
                 response.hash = "";
             }
-           
+            log.Responscu(response);
             return response;
             //return string.Join(string.Empty, msg.Reverse());
             /*
@@ -124,16 +126,10 @@ namespace EfaturaFinalHandler
             MD5 md5 = new MD5CryptoServiceProvider();
             try
             {
-                byte[] result = md5.ComputeHash(objectAsBytes);
+                var Hash = BitConverter.ToString(md5.ComputeHash(objectAsBytes)).Replace("-", "").ToLowerInvariant();
 
-                StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < result.Length; i++)
-                {
-                    sb.Append(result[i].ToString("X2"));
-                }
-
-                // And return it
-                return sb.ToString();
+                
+                return Hash;
             }
             catch (ArgumentNullException ane)
             {

@@ -37,5 +37,36 @@ namespace EfaturaFinalHandler
 
             }
         }
+        public void Requestci(documentType model)
+        {
+            string Path = @"RequestLog.txt";
+            if (File.Exists(Path))
+            {
+
+
+                var WriteData = JsonConvert.SerializeObject(model);
+                using (StreamWriter sw = File.AppendText(Path))
+                {
+                    sw.WriteLine(WriteData);
+                }
+
+            }
+        }
+
+        public void Responscu(documentReturnType model)
+        {
+            string Path = @"ResponseLog.txt";
+            if (File.Exists(Path))
+            {
+
+
+                var WriteData = JsonConvert.SerializeObject(model);
+                using (StreamWriter sw = File.AppendText(Path))
+                {
+                    sw.WriteLine(WriteData);
+                }
+
+            }
+        }
     }
 }
