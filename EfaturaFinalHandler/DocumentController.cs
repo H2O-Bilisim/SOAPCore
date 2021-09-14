@@ -6,6 +6,7 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
+using System.Text.Json;
 
 namespace EfaturaFinalHandler
 {
@@ -33,6 +34,21 @@ namespace EfaturaFinalHandler
             {
                 return 2000;
             }
+
+            // Endpoint to check if the envelope is exists
+            var h = new H2oServiceRequester();
+            var login = h.Login();
+
+            var requestObj = new getAppRespRequestType();
+            requestObj.instanceIdentifier = filename;
+
+            var ReturnOfService = h.CheckIncomingEnvelope(requestObj);
+            getAppRespResponse appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
+            if(appRespResponse !=  "ZARF ID BULUNAMADI")
+            {
+                return faultResponse.getResponse(2004);
+            }
+
             // Call and use memory stream to store binary data on memory
             using (MemoryStream memStream = new MemoryStream(binaryData))
             {
@@ -40,23 +56,12 @@ namespace EfaturaFinalHandler
                 {
                     using (ZipArchive archive = new ZipArchive(memStream, ZipArchiveMode.Read, false))
                     {
-                        // Check the archive name is matched with file name
-                        //if (archiveName != fileName)
-                        //{
-                        //    return 2004;
-                        //}
-
-                        // Endpoint to check if the envelope is exists
-                        var h = new H2oServiceRequester();
-                        var login = h.Login();
-                        var ReturnOfService = h.CheckIncomingEnvelope(fileName);
-                        if (ReturnOfService.envelope_id != fileName)
-                        {
-                            return 2001;
-                        }
-
                         foreach(var item in archive.Entries)
                         {
+                            if(item.FullName.Split('.')[0] != fileName)
+                            {
+                                return 2004;
+                            }
                             string archiveContent = string.Empty;
                             var zstream = new StreamReader(item.Open(), Encoding.UTF8);
                             string ztempstr = zstream.ReadToEnd();
@@ -66,6 +71,13 @@ namespace EfaturaFinalHandler
                             xml.Load(zstream);
                             XmlNamespaceManager nsmgr = new XmlNamespaceManager(xml.NameTable);
                             
+                            string xPathString = "//sh:InstanceIdentifier";
+                            XmlNode instanceIdentifier = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
+                            if(instanceIdentifier != fileName)
+                            {
+                                return 2004;
+                            }
+
                             // Get UUID from xml document
                             string xPathString = "//cbc:UUID";
                             XmlNode uuid = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
@@ -79,6 +91,11 @@ namespace EfaturaFinalHandler
                             }
 
                             archiveContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(ztempstr));
+                            
+                            ModelData.name = item.FullName;
+                            ModelData.document = zipfileContent;
+                            
+                            ProcessModel.doc_list.Add(ModelData);
                         }
                     }
                 }
@@ -88,7 +105,7 @@ namespace EfaturaFinalHandler
                 }
             }
 
-            var ReturnOfService = h.SaveIncomingFile(document);
+            var ReturnOfService = h.SaveIncomingFile(ProcessModel);
             if( ReturnOfService.GetType()  != typeof(string))
             {
                 return 1;

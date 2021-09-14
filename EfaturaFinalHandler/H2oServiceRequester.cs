@@ -59,15 +59,15 @@ namespace EfaturaFinalHandler
             }
         }
         
-        public dynamic SaveIncomingFile(DocumentType model)
+        public dynamic SaveIncomingFile(InternalModel model)
         {
             var Req = JsonConvert.SerializeObject(model);
             var login = Login();
             return SunucuSorgu(req: Req, Ek: SaveIncoming, Key: 1);
         }
-        public dynamic CheckIncomingEnvelope(AppRespResponse response)
+        public dynamic CheckIncomingEnvelope(getAppRespRequestType request)
         {
-            var Req = JsonConvert.SerializeObject(response);
+            var Req = JsonConvert.SerializeObject(request);
             var login = Login();
             return SunucuSorgu(req: Req, Ek: "check-incoming-envelope/", Key: 1);
         }

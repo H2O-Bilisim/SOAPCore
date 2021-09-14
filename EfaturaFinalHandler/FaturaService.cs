@@ -12,25 +12,24 @@ using System.ServiceModel;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using System.Text.Json;
 
 namespace EfaturaFinalHandler
 {
     public class FaturaService : IFaturaService
     {
         private ThreadLocal<string> _paramValue = new ThreadLocal<string>() { Value = string.Empty };
-        public Object sendDocument(DocumentType document)
+
+        public Object sendDocument(documentType document)
         {
             LogWriter log = new LogWriter();
-            //log.Requestci(document);
-
-            var h = new H2oServiceRequester();
-            var login = h.Login();
-
-            DocumentResponse documentResponse = new DocumentResponse();
-            FaultResponse faultResponse = new FaultResponse();
+            log.Requestci(document);
 
             DocumentController documentController = new DocumentController();
             int validCode = documentController.ValidateDocument(document);
+
+            documentReturn documentResponse = new documentReturn();
+            EFaturaFault faultResponse = new EFaturaFault();
 
             dynamic response;
             switch (validCode)
@@ -63,10 +62,23 @@ namespace EfaturaFinalHandler
             log.Responscu(response);
             return response;
         }
-        public Object sendDocument(AppRespRequestType document)
+        public Object getApplicationResponse(getAppRespRequestType instanceIdentifier)
         {
-            var response = new AppRespResponse();
-            return response;
+            LogWriter log = new LogWriter();
+            log.Requestci(instanceIdentifier);
+
+            getAppRespResponse appResponse = new getAppRespResponse();
+            EFaturaFault faultResponse = new EFaturaFault();
+            
+            var ReturnOfService = h.CheckIncomingEnvelope(instanceIdentifier);
+            getAppRespResponse appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
+            if(appRespResponse ==  "ZARF ID BULUNAMADI")
+            {
+                log.Responscu(faultResponse.getResponse(2004));
+                return faultResponse.getResponse(2004);
+            }
+            log.Responscu(appResponse.getResponse(appRespResponse));
+            return appResponse.getResponse(appRespResponse);
         }
     }
 
@@ -74,7 +86,9 @@ namespace EfaturaFinalHandler
     public interface IFaturaService
     {
         [OperationContract]
-        Object sendDocument(DocumentType document);
-        Object sendDocument(AppRespRequestType document);
+        Object getApplicationResponse(getAppRespRequestType instanceIdentifier);
+
+        [OperationContract]
+        Object sendDocument(documentType document);
     }
 }

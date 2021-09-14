@@ -8,31 +8,30 @@ using System.Threading.Tasks;
 namespace EfaturaFinalHandler.Models
 {
     /*
-        Document Response Type Class
+        Document Return Type Class
         Create object type document response data
         @return Object
             String $msg = Response message
             String $hash = MD5 hash of msg variable
     */
     [DataContract]
-    public class DocumentResponseType
+    public class documentReturnType
     {
         [DataMember]
         public string msg { get; set; }
         [DataMember]
         public string hash { get; set; }
     }
-
-    public class DocumentResponse
+    public class documentReturn
     {
-        private DocumentResponseType _getDocumentResponse;
+        private documentReturnType _getDocumentResponse;
         private CryptoHelpers _ch;
-        public DocumentResponse()
+        public documentReturn()
         {
-            _getDocumentResponse = new DocumentResponseType();
+            _getDocumentResponse = new documentReturnType();
             _ch = new CryptoHelpers();
         }
-        public DocumentResponseType getResponse(int code)
+        public documentReturnType getResponse(int code)
         {
             switch (code)
             {
@@ -44,8 +43,6 @@ namespace EfaturaFinalHandler.Models
                     _getDocumentResponse.msg = "ZARF KUYRUGA EKLENDI";
                     _getDocumentResponse.hash = _ch.GetMd5Hash(_getDocumentResponse.msg);
                     break;
-                default:
-                    break;
             }
             return _getDocumentResponse;
         }
@@ -55,29 +52,26 @@ namespace EfaturaFinalHandler.Models
     */
     /***************************************************************************/
     /*
-        Fault Response Type Class
+        E Fatura Fault Type Class
         Create object type fault response data
         @return Object
             Integer $code = Fault code
             String $msg = Fault message
     */
     [DataContract]
-    public class FaultResponseType
+    public class EFaturaFaultType
     {
-        [DataMember]
         public int code { get; set; }
-        [DataMember]      
-        public string msg { get; set; }  
+        public string msg { get; set; }
     }
-
-    public class FaultResponse
+    public class EFaturaFault
     {
-        private FaultResponseType _getFaultResponse;
-        public FaultResponse()
+        private EFaturaFaultType _getFaultResponse;
+        public EFaturaFault()
         {
-            _getFaultResponse = new FaultResponseType();
+            _getFaultResponse = new EFaturaFaultType();
         }
-        public FaultResponseType getResponse(int? InputCode = null)
+        public EFaturaFaultType getResponse(int? InputCode = null)
         {
             if(InputCode == null)
             {
@@ -120,26 +114,25 @@ namespace EfaturaFinalHandler.Models
     */
     /***************************************************************************/
     /*
-        AppResp Response Type Class
+        getAppResp Response Type Class
         Create object type AppResp response data
         @return Object
             String $applicationResponse = Envelope Status message
     */
     [DataContract]
-    public class AppRespResponseType
+    public class getAppRespResponseType
     {
         [DataMember]
         public string applicationResponse { get; set; }
     }
-
-    public class AppRespResponse
+    public class getAppRespResponse
     {
-        private AppRespResponseType _getAppRespResponse;
-        public AppRespResponse()
+        private getAppRespResponseType _getAppRespResponse;
+        public getAppRespResponse()
         {
-            _getAppRespResponse = new AppRespResponseType();
+            _getAppRespResponse = new getAppRespResponseType();
         }
-        public AppRespResponseType getResponse(string status)
+        public getAppRespResponseType getResponse(string status)
         {
             _getAppRespResponse.applicationResponse = status;
             return _getAppRespResponse;
