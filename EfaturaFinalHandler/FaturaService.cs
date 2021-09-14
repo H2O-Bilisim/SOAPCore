@@ -13,6 +13,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Text.Json;
+using System.Net.Security;
 
 namespace EfaturaFinalHandler
 {
@@ -111,11 +112,13 @@ namespace EfaturaFinalHandler
     public interface IFaturaService
     {
         [OperationContract]
-        [FaultContract(typeof(documentTypeFault))]
+        [FaultContract(typeof(getAppRespRequestTypeFault), Action = "http://tempuri.org/IFaturaService/getApplicationResponse", Name = "EFaturaFault")]
         Object getApplicationResponse(getAppRespRequestType instanceIdentifier);
 
         [OperationContract]
-        [FaultContract(typeof(getAppRespRequestTypeFault), Action = "sendDocumentFault", Name = "sendDocumentFault", Namespace = "sendDocument") ]
+        [FaultContract(typeof(documentTypeFault), Action = "http://tempuri.org/IFaturaService/sendDocument",Name ="EFaturaFault")]
+        //[FaultContract(typeof(getAppRespRequestTypeFault),Action = "sendDocumentFault", Name = "sendDocumentFault", Namespace = "sendDocument") ]
+        //[FaultContractAttribute(typeof(getAppRespRequestTypeFault), Action = "http://www.contoso.com/GreetingFault")]
         Object sendDocument(documentType document);
     }
 
