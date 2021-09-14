@@ -1,18 +1,25 @@
+using EfaturaFinalHandler.Helpers;
 using EfaturaFinalHandler.Models;
 using System;
 using System.IO;
 using System.IO.Compression;
 using System.Security.Cryptography;
+using System.Text;
 using System.Xml;
 
 namespace EfaturaFinalHandler
 {
     public class DocumentController
     {
+        private CryptoHelpers _ch;
+        public DocumentController()
+        {
+            _ch = new CryptoHelpers();
+        }
         public int ValidateDocument(DocumentType document)
         {
             // Check all object property is null or empty
-            if (IsNullOrEmpty(document.fileName) || IsNullOrEmpty(document.hash) || IsNullOrEmpty(document.binaryData))
+            if (string.IsNullOrEmpty(document.fileName) || string.IsNullOrEmpty(document.hash) || string.IsNullOrEmpty(Convert.ToBase64String(document.binaryData)))
             {
                 return 2000;
             }
@@ -20,40 +27,30 @@ namespace EfaturaFinalHandler
             // Assign objects property to proper variable
             string fileName = document.fileName;
             string hash = document.hash;
-            byte[] binaryData = FromBase64String(document.binaryData);
-            
+            byte[] binaryData = document.binaryData;
+
+            if(hash != _ch.GetMd5Hash(Convert.ToBase64String(document.binaryData)))
+            {
+                return 2000;
+            }
             // Call and use memory stream to store binary data on memory
             using (MemoryStream memStream = new MemoryStream(binaryData))
             {
-                // Call MD5 library from System.Security.Cryptography
-                using (var md5 = MD5.Create())
-                {
-                    // Use MD5 library to convert byte array to MD5 string
-                    var binaryDataHash =  md5.ComputeHash(memStream).ToString();
-                    
-                    // Check the binaryData is matched with hash
-                    if(binaryDataHash != hash)
-                    {
-                        return 2000;
-                    }
-                }
-                // Try to read and convert binary data to ZipArchive
                 try
                 {
                     using (ZipArchive archive = new ZipArchive(memStream, ZipArchiveMode.Read, false))
                     {
                         // Check the archive name is matched with file name
-                        string archiveName = archive.Entries[0].FullName.Split('.')[0];
-                        if (archiveName != filename)
-                        {
-                            return 2004;
-                        }
+                        //if (archiveName != fileName)
+                        //{
+                        //    return 2004;
+                        //}
 
                         // Endpoint to check if the envelope is exists
                         var h = new H2oServiceRequester();
                         var login = h.Login();
-                        var ReturnOfService = h.CheckIncomingEnvelope(filename);
-                        if (ReturnOfService.envelope_id != filename)
+                        var ReturnOfService = h.CheckIncomingEnvelope(fileName);
+                        if (ReturnOfService.envelope_id != fileName)
                         {
                             return 2001;
                         }
@@ -66,6 +63,7 @@ namespace EfaturaFinalHandler
 
                             // Read archive item as xml document
                             XmlDocument xml = new XmlDocument();
+                            xml.Load(zstream);
                             XmlNamespaceManager nsmgr = new XmlNamespaceManager(xml.NameTable);
                             
                             // Get UUID from xml document
@@ -74,8 +72,8 @@ namespace EfaturaFinalHandler
 
                             // Check UUID if its valid
                             Guid parsedGuid = new Guid();
-                            Guid.TryParse(stringGuid, out parsedGuid);
-                            if (uuid != parsedGuid)
+                            
+                            if (!Guid.TryParse(uuid.InnerText, out parsedGuid))
                             {
                                 return 2006;
                             }

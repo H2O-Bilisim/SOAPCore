@@ -1,3 +1,4 @@
+using EfaturaFinalHandler.Helpers;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -25,9 +26,11 @@ namespace EfaturaFinalHandler.Models
     public class DocumentResponse
     {
         private DocumentResponseType _getDocumentResponse;
+        private CryptoHelpers _ch;
         public DocumentResponse()
         {
             _getDocumentResponse = new DocumentResponseType();
+            _ch = new CryptoHelpers();
         }
         public DocumentResponseType getResponse(int code)
         {
@@ -35,13 +38,14 @@ namespace EfaturaFinalHandler.Models
             {
                 case 0:
                     _getDocumentResponse.msg = "ZARF BASARIYLA ALINDI";
-                    _getDocumentResponse.hash = "c6fa444a15bf9cc2d1b62350e5a8bf39";
+                    _getDocumentResponse.hash = _ch.GetMd5Hash(_getDocumentResponse.msg);
                     break;
                 case 1:
                     _getDocumentResponse.msg = "ZARF KUYRUGA EKLENDI";
-                    _getDocumentResponse.hash = "b2721454481f0672ce3a7ee41c1c101c";
+                    _getDocumentResponse.hash = _ch.GetMd5Hash(_getDocumentResponse.msg);
                     break;
                 default:
+                    break;
             }
             return _getDocumentResponse;
         }
@@ -73,34 +77,41 @@ namespace EfaturaFinalHandler.Models
         {
             _getFaultResponse = new FaultResponseType();
         }
-        public FaultResponseType getResponse(int code = null)
+        public FaultResponseType getResponse(int? InputCode = null)
         {
-            switch (code)
+            if(InputCode == null)
             {
-                case 2000:
-                    _getFaultResponse.code = code;
-                    _getFaultResponse.msg = "OZET DEGERLER ESIT DEGIL";
-                    break;
-                case 2001:
-                    _getFaultResponse.code = code;
-                    _getFaultResponse.msg = "ZARF ID SISTEMDE MEVCUT";
-                    break;
-                case 2003:
-                    _getFaultResponse.code = code;
-                    _getFaultResponse.msg = "ZARF KUYRUGA EKLENEMEDI";
-                    break;
-                case 2004:
-                    _getFaultResponse.code = code;
-                    _getFaultResponse.msg = "ZARF ID BULUNAMADI";
-                    break;
-                case 2006:
-                    _getFaultResponse.code = code;
-                    _getFaultResponse.msg = "GECERSIZ ZARF ADI";
-                    break;
-                default:
-                    _getFaultResponse.code = 2003;
-                    _getFaultResponse.msg = "ZARF KUYRUGA EKLENEMEDI";
+                _getFaultResponse.code = 2003;
+                _getFaultResponse.msg = "ZARF KUYRUGA EKLENEMEDI";
             }
+            else
+            {
+                int code = Convert.ToInt32(InputCode.ToString());
+                switch (code)
+                {
+                    case 2000:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "OZET DEGERLER ESIT DEGIL";
+                        break;
+                    case 2001:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "ZARF ID SISTEMDE MEVCUT";
+                        break;
+                    case 2003:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "ZARF KUYRUGA EKLENEMEDI";
+                        break;
+                    case 2004:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "ZARF ID BULUNAMADI";
+                        break;
+                    case 2006:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "GECERSIZ ZARF ADI";
+                        break;
+                }
+            }
+           
             return _getFaultResponse;
         }
     }

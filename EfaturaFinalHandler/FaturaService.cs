@@ -21,18 +21,18 @@ namespace EfaturaFinalHandler
         public Object sendDocument(DocumentType document)
         {
             LogWriter log = new LogWriter();
-            log.Requestci(document);
+            //log.Requestci(document);
 
             var h = new H2oServiceRequester();
             var login = h.Login();
 
-            DocumentResponseType documentResponse = new DocumentResponseType();
-            FaultResponseType faultResponse = new FaultResponseType();
+            DocumentResponse documentResponse = new DocumentResponse();
+            FaultResponse faultResponse = new FaultResponse();
 
             DocumentController documentController = new DocumentController();
             int validCode = documentController.ValidateDocument(document);
 
-            var response;
+            dynamic response;
             switch (validCode)
             {
                 case 0:
@@ -58,8 +58,14 @@ namespace EfaturaFinalHandler
                     break;
                 default:
                     response = faultResponse.getResponse();
+                    break;
             }
             log.Responscu(response);
+            return response;
+        }
+        public Object sendDocument(AppRespRequestType document)
+        {
+            var response = new AppRespResponse();
             return response;
         }
     }
@@ -69,5 +75,6 @@ namespace EfaturaFinalHandler
     {
         [OperationContract]
         Object sendDocument(DocumentType document);
+        Object sendDocument(AppRespRequestType document);
     }
 }
