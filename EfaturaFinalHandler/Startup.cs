@@ -76,8 +76,8 @@ namespace EfaturaFinalHandler
                     context.Request.Body = initialBody;
                 }
             });
-            app.UseSoapEndpoint<IFaturaService>(path: "/gibhandler.wsdl", binding: new BasicHttpBinding());
-            app.UseSoapEndpoint<IFaturaService>(path: "/gibhandler", binding: new BasicHttpBinding());
+            app.UseSoapEndpoint<IFaturaService>(path: "/gibhandler.wsdl", binding: new BasicHttpBinding(),SoapSerializer.XmlSerializer);
+            app.UseSoapEndpoint<IFaturaService>(path: "/gibhandler", binding: new BasicHttpBinding(),SoapSerializer.XmlSerializer);
 
 
         }

@@ -17,7 +17,7 @@ namespace EfaturaFinalHandler
         {
             _ch = new CryptoHelpers();
         }
-        public int ValidateDocument(DocumentType document)
+        public int ValidateDocument(documentType document)
         {
             // Check all object property is null or empty
             if (string.IsNullOrEmpty(document.fileName) || string.IsNullOrEmpty(document.hash) || string.IsNullOrEmpty(Convert.ToBase64String(document.binaryData)))
@@ -40,15 +40,15 @@ namespace EfaturaFinalHandler
             var login = h.Login();
 
             var requestObj = new getAppRespRequestType();
-            requestObj.instanceIdentifier = filename;
+            requestObj.instanceIdentifier = document.fileName;
 
             var ReturnOfService = h.CheckIncomingEnvelope(requestObj);
-            getAppRespResponse appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
-            if(appRespResponse !=  "ZARF ID BULUNAMADI")
+            getAppRespResponseType appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
+            if(appRespResponse.applicationResponse !=  "ZARF ID BULUNAMADI")
             {
-                return faultResponse.getResponse(2004);
+                return 2004;
             }
-
+            var ProcessModel = new InternalModel();
             // Call and use memory stream to store binary data on memory
             using (MemoryStream memStream = new MemoryStream(binaryData))
             {
@@ -73,13 +73,13 @@ namespace EfaturaFinalHandler
                             
                             string xPathString = "//sh:InstanceIdentifier";
                             XmlNode instanceIdentifier = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
-                            if(instanceIdentifier != fileName)
+                            if(instanceIdentifier.InnerText != fileName)
                             {
                                 return 2004;
                             }
 
                             // Get UUID from xml document
-                            string xPathString = "//cbc:UUID";
+                            xPathString = "//cbc:UUID";
                             XmlNode uuid = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
 
                             // Check UUID if its valid
@@ -92,8 +92,9 @@ namespace EfaturaFinalHandler
 
                             archiveContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(ztempstr));
                             
+                            var ModelData = new Doclist();
                             ModelData.name = item.FullName;
-                            ModelData.document = zipfileContent;
+                            ModelData.document = archiveContent;
                             
                             ProcessModel.doc_list.Add(ModelData);
                         }
@@ -105,8 +106,8 @@ namespace EfaturaFinalHandler
                 }
             }
 
-            var ReturnOfService = h.SaveIncomingFile(ProcessModel);
-            if( ReturnOfService.GetType()  != typeof(string))
+            var ServiceReturn = h.SaveIncomingFile(ProcessModel);
+            if(ServiceReturn.GetType()  != typeof(string))
             {
                 return 1;
             }
@@ -115,7 +116,6 @@ namespace EfaturaFinalHandler
                 return 2003;
             }
 
-            return 0;
         }
     }
 }
