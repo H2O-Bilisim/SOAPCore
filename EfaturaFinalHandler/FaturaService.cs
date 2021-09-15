@@ -40,37 +40,18 @@ namespace EfaturaFinalHandler
                         return documentResponse.getResponse(validCode);
                     case 1:
                         return documentResponse.getResponse(validCode);
-                    case 2000:
-                        throw faultResponse.getResponse(validCode);
-                    case 2001:
-                        throw faultResponse.getResponse(validCode);
-                    case 2003:
-                        throw faultResponse.getResponse(validCode);
-                    case 2004:
-                        throw faultResponse.getResponse(validCode);
-                    case 2006:
-                        throw faultResponse.getResponse(validCode);
                     default:
-                        throw faultResponse.getResponse();
+                        throw new FaultTypeException(2005);
                 }
-                log.Responscu(response);
             }
-            catch (FaultException)
+            catch (FaultTypeException fault)
             {
-                throw faultResponse.getResponse(2005);
-                // var fault = ex.CreateMessageFault();
-                // var FaultModel = new documentTypeFault();
-                // FaultModel.faultCode = int.Parse(fault.Code.ToString());
-                // FaultModel.faultMsg = fault.Reason.ToString();
-                // return fault;
+                return fault;
             }
             
         }
         public getAppRespResponseType getApplicationResponse(getAppRespRequestType instanceIdentifier)
         {
-            FaultException exception = new FaultException();
-            var fault = exception.CreateMessageFault();
-            
             try
             {
                 var h = new H2oServiceRequester();
@@ -84,18 +65,13 @@ namespace EfaturaFinalHandler
                 getAppRespResponseType appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
                 if (appRespResponse.applicationResponse == "ZARF ID BULUNAMADI")
                 {
-                    throw faultResponse.getResponse(2004);
+                    throw new FaultTypeException(2004);
                 }
                 return appResponse.getResponse(appRespResponse.applicationResponse);
             }
-            catch(FaultException ex)
+            catch(FaultTypeException fault)
             {
-                throw faultResponse.getResponse(2005);
-                // var fault = ex.CreateMessageFault();
-                // var FaultModel = new getAppRespRequestTypeFault();
-                // FaultModel.faultCode = int.Parse(fault.Code.ToString());
-                // FaultModel.faultMsg = fault.Reason.ToString();
-                // return fault;
+                return fault;
             }
             
         }

@@ -152,6 +152,21 @@ namespace EfaturaFinalHandler.Models
             return _getFaultResponse;
         }
     }
+    [System.Serializable]
+    public class FaultTypeException : System.Exception
+    {
+        private EFaturaFault _faultResponse;
+        public FaultTypeException() {
+            _faultResponse = new EFaturaFault();
+        }
+        public FaultTypeException(int code) : base(code) {
+            return _faultResponse.getResponse(code);
+        }
+        public FaultTypeException(int code, System.Exception inner) : base(code, inner) { }
+        protected FaultTypeException(
+            System.Runtime.Serialization.SerializationInfo info,
+            System.Runtime.Serialization.StreamingContext context) : base(info, context) { }
+    }
     /*
         END Fault Response Type Class
     */
