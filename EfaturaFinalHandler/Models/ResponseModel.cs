@@ -8,6 +8,35 @@ using System.Threading.Tasks;
 namespace EfaturaFinalHandler.Models
 {
     /*
+        getAppResp Response Type Class
+        Create object type AppResp response data
+        @return Object
+            String $applicationResponse = Envelope Status message
+    */
+    [DataContract]
+    public class getAppRespResponseType
+    {
+        [DataMember]
+        public string applicationResponse { get; set; }
+    }
+    public class getAppRespResponse
+    {
+        private getAppRespResponseType _getAppRespResponse;
+        public getAppRespResponse()
+        {
+            _getAppRespResponse = new getAppRespResponseType();
+        }
+        public getAppRespResponseType getResponse(string status)
+        {
+            _getAppRespResponse.applicationResponse = status;
+            return _getAppRespResponse;
+        }
+    }
+    /*
+        END AppResp Response Type Class
+    */
+    /***************************************************************************/
+    /*
         Document Return Type Class
         Create object type document response data
         @return Object
@@ -61,7 +90,9 @@ namespace EfaturaFinalHandler.Models
     [DataContract]
     public class EFaturaFaultType
     {
+        [DataMember]
         public int code { get; set; }
+        [DataMember]
         public string msg { get; set; }
     }
     public class EFaturaFault
@@ -91,6 +122,10 @@ namespace EfaturaFinalHandler.Models
                         _getFaultResponse.code = code;
                         _getFaultResponse.msg = "ZARF ID SISTEMDE MEVCUT";
                         break;
+                    case 2002:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "ZARF ARSIVE EKLENEMEDI";
+                        break;
                     case 2003:
                         _getFaultResponse.code = code;
                         _getFaultResponse.msg = "ZARF KUYRUGA EKLENEMEDI";
@@ -99,9 +134,17 @@ namespace EfaturaFinalHandler.Models
                         _getFaultResponse.code = code;
                         _getFaultResponse.msg = "ZARF ID BULUNAMADI";
                         break;
+                    case 2005:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "SISTEM HATASI";
+                        break;
                     case 2006:
                         _getFaultResponse.code = code;
                         _getFaultResponse.msg = "GECERSIZ ZARF ADI";
+                        break;
+                    case 2007:
+                        _getFaultResponse.code = code;
+                        _getFaultResponse.msg = "PAKET   GÖNDERMEYE   VE   SORGULAMAYA   YETKİNİZ   GEÇİCİ   OLARAK KALDIRILMIŞTIR.";
                         break;
                 }
             }
@@ -111,34 +154,5 @@ namespace EfaturaFinalHandler.Models
     }
     /*
         END Fault Response Type Class
-    */
-    /***************************************************************************/
-    /*
-        getAppResp Response Type Class
-        Create object type AppResp response data
-        @return Object
-            String $applicationResponse = Envelope Status message
-    */
-    [DataContract]
-    public class getAppRespResponseType
-    {
-        [DataMember]
-        public string applicationResponse { get; set; }
-    }
-    public class getAppRespResponse
-    {
-        private getAppRespResponseType _getAppRespResponse;
-        public getAppRespResponse()
-        {
-            _getAppRespResponse = new getAppRespResponseType();
-        }
-        public getAppRespResponseType getResponse(string status)
-        {
-            _getAppRespResponse.applicationResponse = status;
-            return _getAppRespResponse;
-        }
-    }
-    /*
-        END AppResp Response Type Class
     */
 }

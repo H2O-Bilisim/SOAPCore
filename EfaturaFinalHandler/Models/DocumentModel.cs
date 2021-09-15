@@ -18,29 +18,11 @@ namespace EfaturaFinalHandler.Models
         [DataMember]
         public string hash { get; set; }
     }
-    [DataContract]
-    public class documentTypeFault
-    {
-        [DataMember]
-        public int faultCode { get; set; }
-
-        [DataMember]
-        public string faultMsg { get; set; }
-    }
 
     [DataContract]
     public class getAppRespRequestType
     {
         [DataMember]
         public string instanceIdentifier { get; set; }
-    }
-    [DataContract]
-    public class getAppRespRequestTypeFault
-    {
-        [DataMember]
-        public int faultCode { get; set; }
-
-        [DataMember]
-        public string faultMsg { get; set; }
     }
 }

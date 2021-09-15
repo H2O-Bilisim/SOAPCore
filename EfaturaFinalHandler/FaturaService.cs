@@ -21,7 +21,7 @@ namespace EfaturaFinalHandler
     {
         private ThreadLocal<string> _paramValue = new ThreadLocal<string>() { Value = string.Empty };
 
-        public Object sendDocument(documentType document)
+        public documentReturnType sendDocument(documentType document)
         {
             try
             {
@@ -34,49 +34,43 @@ namespace EfaturaFinalHandler
                 documentReturn documentResponse = new documentReturn();
                 EFaturaFault faultResponse = new EFaturaFault();
 
-                dynamic response;
                 switch (validCode)
                 {
                     case 0:
-                        response = documentResponse.getResponse(validCode);
-                        break;
+                        return documentResponse.getResponse(validCode);
                     case 1:
-                        response = documentResponse.getResponse(validCode);
-                        break;
+                        return documentResponse.getResponse(validCode);
                     case 2000:
-                        response = faultResponse.getResponse(validCode);
-                        break;
+                        throw faultResponse.getResponse(validCode);
                     case 2001:
-                        response = faultResponse.getResponse(validCode);
-                        break;
+                        throw faultResponse.getResponse(validCode);
                     case 2003:
-                        response = faultResponse.getResponse(validCode);
-                        break;
+                        throw faultResponse.getResponse(validCode);
                     case 2004:
-                        response = faultResponse.getResponse(validCode);
-                        break;
+                        throw faultResponse.getResponse(validCode);
                     case 2006:
-                        response = faultResponse.getResponse(validCode);
-                        break;
+                        throw faultResponse.getResponse(validCode);
                     default:
-                        response = faultResponse.getResponse();
-                        break;
+                        throw faultResponse.getResponse();
                 }
                 log.Responscu(response);
-                return response;
             }
-            catch (FaultException ex)
+            catch (FaultException)
             {
-                var fault = ex.CreateMessageFault();
-                var FaultModel = new documentTypeFault();
-                FaultModel.faultCode = int.Parse(fault.Code.ToString());
-                FaultModel.faultMsg = fault.Reason.ToString();
-                return fault;
+                throw faultResponse.getResponse(2005);
+                // var fault = ex.CreateMessageFault();
+                // var FaultModel = new documentTypeFault();
+                // FaultModel.faultCode = int.Parse(fault.Code.ToString());
+                // FaultModel.faultMsg = fault.Reason.ToString();
+                // return fault;
             }
             
         }
-        public Object getApplicationResponse(getAppRespRequestType instanceIdentifier)
+        public getAppRespResponseType getApplicationResponse(getAppRespRequestType instanceIdentifier)
         {
+            FaultException exception = new FaultException();
+            var fault = exception.CreateMessageFault();
+            
             try
             {
                 var h = new H2oServiceRequester();
@@ -90,19 +84,18 @@ namespace EfaturaFinalHandler
                 getAppRespResponseType appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
                 if (appRespResponse.applicationResponse == "ZARF ID BULUNAMADI")
                 {
-                    //log.Responscu(faultResponse.getResponse(2004));
-                    return faultResponse.getResponse(2004);
+                    throw faultResponse.getResponse(2004);
                 }
-                //log.Responscu(appResponse.getResponse(appRespResponse));
                 return appResponse.getResponse(appRespResponse.applicationResponse);
             }
             catch(FaultException ex)
             {
-                var fault = ex.CreateMessageFault();
-                var FaultModel = new getAppRespRequestTypeFault();
-                FaultModel.faultCode = int.Parse(fault.Code.ToString());
-                FaultModel.faultMsg = fault.Reason.ToString();
-                return fault;
+                throw faultResponse.getResponse(2005);
+                // var fault = ex.CreateMessageFault();
+                // var FaultModel = new getAppRespRequestTypeFault();
+                // FaultModel.faultCode = int.Parse(fault.Code.ToString());
+                // FaultModel.faultMsg = fault.Reason.ToString();
+                // return fault;
             }
             
         }
@@ -112,14 +105,12 @@ namespace EfaturaFinalHandler
     public interface IFaturaService
     {
         [OperationContract]
-        [FaultContract(typeof(getAppRespRequestTypeFault), Action = "http://tempuri.org/IFaturaService/getApplicationResponse", Name = "EFaturaFault")]
-        Object getApplicationResponse(getAppRespRequestType instanceIdentifier);
+        [FaultContract(typeof(EFaturaFaultType), Action = "http://tempuri.org/IFaturaService/getApplicationResponse", Name = "EFaturaFaultType")]
+        getAppRespResponseType getApplicationResponse(getAppRespRequestType instanceIdentifier);
 
         [OperationContract]
-        [FaultContract(typeof(documentTypeFault), Action = "http://tempuri.org/IFaturaService/sendDocument",Name ="EFaturaFault")]
-        //[FaultContract(typeof(getAppRespRequestTypeFault),Action = "sendDocumentFault", Name = "sendDocumentFault", Namespace = "sendDocument") ]
-        //[FaultContractAttribute(typeof(getAppRespRequestTypeFault), Action = "http://www.contoso.com/GreetingFault")]
-        Object sendDocument(documentType document);
+        [FaultContract(typeof(EFaturaFaultType), Action = "http://tempuri.org/IFaturaService/sendDocument",Name ="EFaturaFaultType")]
+        documentReturnType sendDocument(documentType document);
     }
 
     
