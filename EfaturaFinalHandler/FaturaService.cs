@@ -32,7 +32,6 @@ namespace EfaturaFinalHandler
                 int validCode = documentController.ValidateDocument(document);
 
                 documentReturn documentResponse = new documentReturn();
-                EFaturaFault faultResponse = new EFaturaFault();
 
                 switch (validCode)
                 {
@@ -41,12 +40,14 @@ namespace EfaturaFinalHandler
                     case 1:
                         return documentResponse.getResponse(validCode);
                     default:
-                        throw new FaultTypeException(2005);
+                        throw new FaultException("2005");
                 }
             }
-            catch (FaultTypeException fault)
+            catch (FaultException faultCode)
             {
-                return fault;
+                EFaturaFault faultResponse = new EFaturaFault();
+                var fault = faultResponse.getResponse(Convert.ToInt32(faultCode)); 
+                throw new FaultException<EFaturaFaultType>(fault);
             }
             
         }
@@ -59,21 +60,21 @@ namespace EfaturaFinalHandler
                 log.Requestci(instanceIdentifier);
 
                 getAppRespResponse appResponse = new getAppRespResponse();
-                EFaturaFault faultResponse = new EFaturaFault();
 
                 var ReturnOfService = h.CheckIncomingEnvelope(instanceIdentifier);
                 getAppRespResponseType appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
                 if (appRespResponse.applicationResponse == "ZARF ID BULUNAMADI")
                 {
-                    throw new FaultTypeException(2004);
+                    throw new FaultException("2004");
                 }
                 return appResponse.getResponse(appRespResponse.applicationResponse);
             }
-            catch(FaultTypeException fault)
+            catch(FaultException faultCode)
             {
-                return fault;
+                EFaturaFault faultResponse = new EFaturaFault();
+                var fault = faultResponse.getResponse(Convert.ToInt32(faultCode)); 
+                throw new FaultException<EFaturaFaultType>(fault);
             }
-            
         }
     }
 
@@ -81,13 +82,11 @@ namespace EfaturaFinalHandler
     public interface IFaturaService
     {
         [OperationContract]
-        [FaultContract(typeof(EFaturaFaultType), Action = "http://tempuri.org/IFaturaService/getApplicationResponse", Name = "EFaturaFaultType")]
+        [FaultContract(typeof(EFaturaFaultType), Action = "http://tempuri.org/IFaturaService/getApplicationResponse", Name = "EFaturaFault")]
         getAppRespResponseType getApplicationResponse(getAppRespRequestType instanceIdentifier);
 
         [OperationContract]
-        [FaultContract(typeof(EFaturaFaultType), Action = "http://tempuri.org/IFaturaService/sendDocument",Name ="EFaturaFaultType")]
+        [FaultContract(typeof(EFaturaFaultType), Action = "http://tempuri.org/IFaturaService/sendDocument",Name ="EFaturaFault")]
         documentReturnType sendDocument(documentType document);
     }
-
-    
 }

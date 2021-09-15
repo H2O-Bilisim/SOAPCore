@@ -7,6 +7,7 @@ using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
 using System.Text.Json;
+using System.ServiceModel;
 
 namespace EfaturaFinalHandler
 {
@@ -22,7 +23,7 @@ namespace EfaturaFinalHandler
             // Check all object property is null or empty
             if (string.IsNullOrEmpty(document.fileName) || string.IsNullOrEmpty(document.hash) || string.IsNullOrEmpty(Convert.ToBase64String(document.binaryData)))
             {
-                throw new FaultTypeException(2000);
+                throw new FaultException("2000");
             }
 
             // Assign objects property to proper variable
@@ -32,7 +33,7 @@ namespace EfaturaFinalHandler
 
             if(hash != _ch.GetMd5Hash(Convert.ToBase64String(document.binaryData)))
             {
-                throw new FaultTypeException(2000);
+                throw new FaultException("2000");
             }
 
             // Endpoint to check if the envelope is exists
@@ -46,7 +47,7 @@ namespace EfaturaFinalHandler
             getAppRespResponseType appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
             if(appRespResponse.applicationResponse !=  "ZARF ID BULUNAMADI")
             {
-                throw new FaultTypeException(2004);
+                throw new FaultException("2004");
             }
             var ProcessModel = new InternalModel();
             // Call and use memory stream to store binary data on memory
@@ -60,7 +61,7 @@ namespace EfaturaFinalHandler
                         {
                             if(item.FullName.Split('.')[0] != fileName)
                             {
-                                throw new FaultTypeException(2004);
+                                throw new FaultException("2004");
                             }
                             string archiveContent = string.Empty;
                             var zstream = new StreamReader(item.Open(), Encoding.UTF8);
@@ -75,7 +76,7 @@ namespace EfaturaFinalHandler
                             XmlNode instanceIdentifier = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
                             if(instanceIdentifier.InnerText != fileName)
                             {
-                                throw new FaultTypeException(2004);
+                                throw new FaultException("2004");
                             }
 
                             // Get UUID from xml document
@@ -87,7 +88,7 @@ namespace EfaturaFinalHandler
                             
                             if (!Guid.TryParse(uuid.InnerText, out parsedGuid))
                             {
-                                throw new FaultTypeException(2006);
+                                throw new FaultException("2006");
                             }
 
                             archiveContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(ztempstr));
@@ -102,7 +103,7 @@ namespace EfaturaFinalHandler
                 }
                 catch (Exception)
                 {
-                    throw new FaultTypeException(2004);
+                    throw new FaultException("2004");
                 }
             }
 
@@ -113,7 +114,7 @@ namespace EfaturaFinalHandler
             }
             else
             {
-                throw new FaultTypeException(2005);
+                throw new FaultException("2005");
             }
 
         }
