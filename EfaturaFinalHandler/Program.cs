@@ -21,6 +21,7 @@ namespace EfaturaFinalHandler
                 .ConfigureWebHostDefaults(webBuilder =>
                 {
                     webBuilder.UseStartup<Startup>();
+                    webBuilder.UseUrls("https://localhost:5003;http://localhost:5002")
                 });
     }
 }
