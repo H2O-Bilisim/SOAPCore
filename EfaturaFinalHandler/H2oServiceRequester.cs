@@ -15,12 +15,13 @@ namespace EfaturaFinalHandler
     public class H2oServiceRequester
     {
         public  string Token = null;
-        // public  string ApiHost = "https://portalapi.devdonusum.com/api/";
-        public  string ApiHost = "http://localhost:8000/api/";
+        public string ApiHost = "https://portalapi.devdonusum.com/api/";
         public  string GetToken = "token/";
         public  string SaveIncoming = "save-incoming/";
-        private  string ApiUser = "dra_portal.2";
-        private  string ApiPass = "qzj.3TVe7x;$2.gJ";
+        private string ApiUser = "huseroz";
+        private string ApiPass = "11221122";
+        //private  string ApiUser = "dra_portal.2";
+        //private  string ApiPass = "qzj.3TVe7x;$2.gJ";
         public H2oServiceRequester()
         {
             //var configuration = new IConfiguration();
@@ -65,7 +66,7 @@ namespace EfaturaFinalHandler
             var login = Login();
             return SunucuSorgu(req: Req, Ek: SaveIncoming, Key: 1);
         }
-        public dynamic CheckIncomingEnvelope(getAppRespRequestType request)
+        public dynamic CheckIncomingEnvelope(getAppRespRequest request)
         {
             var Req = JsonConvert.SerializeObject(request);
             var login = Login();

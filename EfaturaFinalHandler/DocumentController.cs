@@ -18,12 +18,14 @@ namespace EfaturaFinalHandler
         {
             _ch = new CryptoHelpers();
         }
-        public int ValidateDocument(documentType document)
+        public int ValidateDocument(documentRequest document)
         {
+            EFaturaFaultType fault = new EFaturaFaultType();
+            
             // Check all object property is null or empty
             if (string.IsNullOrEmpty(document.fileName) || string.IsNullOrEmpty(document.hash) || string.IsNullOrEmpty(Convert.ToBase64String(document.binaryData)))
             {
-                throw new FaultException("2000");
+                fault.throwResponse("2000");
             }
 
             // Assign objects property to proper variable
@@ -33,21 +35,17 @@ namespace EfaturaFinalHandler
 
             if(hash != _ch.GetMd5Hash(Convert.ToBase64String(document.binaryData)))
             {
-                throw new FaultException("2000");
+                fault.throwResponse("2000");
             }
 
             // Endpoint to check if the envelope is exists
             var h = new H2oServiceRequester();
             var login = h.Login();
 
-            var requestObj = new getAppRespRequestType();
-            requestObj.instanceIdentifier = document.fileName;
-
-            var ReturnOfService = h.CheckIncomingEnvelope(requestObj);
-            getAppRespResponseType appRespResponse = JsonSerializer.Deserialize(ReturnOfService);
-            if(appRespResponse.applicationResponse !=  "ZARF ID BULUNAMADI")
+            var appRespResponse = new getAppRespResponseType();
+            if(appRespResponse.getResponse(document.fileName).applicationResponse !=  "ZARF ID BULUNAMADI")
             {
-                throw new FaultException("2004");
+                fault.throwResponse("2004");
             }
             var ProcessModel = new InternalModel();
             // Call and use memory stream to store binary data on memory
@@ -61,7 +59,7 @@ namespace EfaturaFinalHandler
                         {
                             if(item.FullName.Split('.')[0] != fileName)
                             {
-                                throw new FaultException("2004");
+                                fault.throwResponse("2004");
                             }
                             string archiveContent = string.Empty;
                             var zstream = new StreamReader(item.Open(), Encoding.UTF8);
@@ -76,7 +74,7 @@ namespace EfaturaFinalHandler
                             XmlNode instanceIdentifier = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
                             if(instanceIdentifier.InnerText != fileName)
                             {
-                                throw new FaultException("2004");
+                                fault.throwResponse("2004");
                             }
 
                             // Get UUID from xml document
@@ -88,7 +86,7 @@ namespace EfaturaFinalHandler
                             
                             if (!Guid.TryParse(uuid.InnerText, out parsedGuid))
                             {
-                                throw new FaultException("2006");
+                                fault.throwResponse("2006");
                             }
 
                             archiveContent = Convert.ToBase64String(Encoding.UTF8.GetBytes(ztempstr));
@@ -103,7 +101,7 @@ namespace EfaturaFinalHandler
                 }
                 catch (Exception)
                 {
-                    throw new FaultException("2004");
+                    fault.throwResponse("2004");
                 }
             }
 
@@ -114,9 +112,9 @@ namespace EfaturaFinalHandler
             }
             else
             {
-                throw new FaultException("2005");
+                fault.throwResponse("2005");
             }
-
+            return 0;
         }
     }
 }
