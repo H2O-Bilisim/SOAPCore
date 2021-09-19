@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace EfaturaFinalHandler.Models
 {
     [DataContract]
-    public class documentType
+    public class documentRequest
     {
         [DataMember]
         public string fileName { get; set; }
@@ -17,6 +17,12 @@ namespace EfaturaFinalHandler.Models
 
         [DataMember]
         public string hash { get; set; }
+    }
 
+    [DataContract]
+    public class getAppRespRequest
+    {
+        [DataMember]
+        public string instanceIdentifier { get; set; }
     }
 }
