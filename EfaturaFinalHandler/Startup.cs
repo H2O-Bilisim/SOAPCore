@@ -1,17 +1,13 @@
 using Microsoft.AspNetCore.Builder;
-using Microsoft.AspNetCore.Diagnostics;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Http;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Hosting;
 using Microsoft.OpenApi.Models;
-using Newtonsoft.Json;
 using SoapCore;
 using System;
 using System.IO;
-using System.ServiceModel;
 using System.Text;
 
 namespace EfaturaFinalHandler
@@ -34,7 +30,7 @@ namespace EfaturaFinalHandler
             {
                 c.SwaggerDoc("v1", new OpenApiInfo { Title = "EfaturaFinalHandler", Version = "v1" });
             });
-            services.TryAddSingleton<IFaturaService, FaturaService>();
+            services.TryAddSingleton<EFatura, FaturaService>();
             services.AddSoapServiceOperationTuner(new EfaturaServiceOperationTuner());
             services.AddSoapExceptionTransformer((ex) => ex.Message);
         }
@@ -55,8 +51,8 @@ namespace EfaturaFinalHandler
 
             app.UseAuthorization();
             app.UseEndpoints(endpoints => {
-                //endpoints.UseSoapEndpoint<IFaturaService>("/Efatura.svc", new SoapEncoderOptions(), SoapSerializer.DataContractSerializer);
-                //endpoints.UseSoapEndpoint<IFaturaService>("/Efatura.asmx", new SoapEncoderOptions(), SoapSerializer.XmlSerializer);
+                //endpoints.UseSoapEndpoint<EFatura>("/Efatura.svc", new SoapEncoderOptions(), SoapSerializer.DataContractSerializer);
+                //endpoints.UseSoapEndpoint<EFatura>("/Efatura.asmx", new SoapEncoderOptions(), SoapSerializer.XmlSerializer);
                 endpoints.MapControllers();
             });
 
@@ -76,9 +72,9 @@ namespace EfaturaFinalHandler
                     context.Request.Body = initialBody;
                 }
             });
-            app.UseSoapEndpoint<IFaturaService>(path: "/gibhandler.wsdl", binding: new BasicHttpBinding());
-            app.UseSoapEndpoint<IFaturaService>(path: "/gibhandler", binding: new BasicHttpBinding());
-
+            app.UseSoapEndpoint<EFatura>("/gibhandler.wsdl", new SoapEncoderOptions());
+            app.UseSoapEndpoint<EFatura>("/gibhandler", new SoapEncoderOptions());
+            
 
         }
     }

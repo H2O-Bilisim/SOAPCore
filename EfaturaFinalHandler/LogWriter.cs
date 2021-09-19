@@ -37,7 +37,7 @@ namespace EfaturaFinalHandler
 
             }
         }
-        public void Requestci(documentType model)
+        public void Requestci(Object model)
         {
             string Path = @"RequestLog.txt";
             if (File.Exists(Path))
