@@ -1,14 +1,9 @@
 ﻿using EfaturaFinalHandler.Models;
-using Microsoft.Extensions.Configuration;
 using Newtonsoft.Json;
 using System;
-using System.Collections.Generic;
-using System.Configuration;
 using System.Dynamic;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 
 namespace EfaturaFinalHandler
 {
@@ -20,8 +15,6 @@ namespace EfaturaFinalHandler
         public  string SaveIncoming = "save-incoming/";
         private string ApiUser = "huseroz";
         private string ApiPass = "11221122";
-        //private  string ApiUser = "dra_portal.2";
-        //private  string ApiPass = "qzj.3TVe7x;$2.gJ";
         public H2oServiceRequester()
         {
             //var configuration = new IConfiguration();

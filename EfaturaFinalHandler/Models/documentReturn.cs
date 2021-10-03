@@ -11,27 +11,10 @@ namespace EfaturaFinalHandler.Models
             _getDocumentResponse = new documentResponse();
             _ch = new CryptoHelpers();
         }
-        public documentResponse getResponse(int code)
+        public documentResponse getResponse()
         {
-            try
-            {
-                switch (code)
-                {
-                    case 0:
-                        _getDocumentResponse.msg = "ZARF BASARIYLA ALINDI";
-                        _getDocumentResponse.hash = _ch.GetMd5Hash(_getDocumentResponse.msg);
-                        break;
-                    case 1:
-                        _getDocumentResponse.msg = "ZARF KUYRUGA EKLENDI";
-                        _getDocumentResponse.hash = _ch.GetMd5Hash(_getDocumentResponse.msg);
-                        break;
-                }
-            }
-            catch
-            {
-                EFaturaFaultType faultResponse = new EFaturaFaultType();
-                faultResponse.throwResponse("2005");
-            }
+            _getDocumentResponse.msg = "ZARF KUYRUGA EKLENDI";
+            _getDocumentResponse.hash = _ch.GetMd5Hash(_getDocumentResponse.msg);
             return _getDocumentResponse;
         }
     }

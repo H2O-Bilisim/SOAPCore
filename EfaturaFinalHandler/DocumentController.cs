@@ -6,8 +6,6 @@ using System.IO.Compression;
 using System.Security.Cryptography;
 using System.Text;
 using System.Xml;
-using System.Text.Json;
-using System.ServiceModel;
 
 namespace EfaturaFinalHandler
 {
@@ -18,7 +16,7 @@ namespace EfaturaFinalHandler
         {
             _ch = new CryptoHelpers();
         }
-        public int ValidateDocument(documentRequest document)
+        public void ValidateDocument(documentRequest document)
         {
             EFaturaFaultType fault = new EFaturaFaultType();
             
@@ -29,13 +27,18 @@ namespace EfaturaFinalHandler
             }
 
             // Assign objects property to proper variable
-            string fileName = document.fileName;
+            string fileName = document.fileName.Replace(".zip","");
             string hash = document.hash;
             byte[] binaryData = document.binaryData;
 
-            if(hash != _ch.GetMd5Hash(Convert.ToBase64String(document.binaryData)))
+            using (MD5 md5 =  MD5.Create())
             {
-                fault.throwResponse("2000");
+                string binaryHash = BitConverter.ToString(md5.ComputeHash(binaryData)).Replace("-", "");
+                
+                if (hash != binaryHash)
+                {
+                    fault.throwResponse("2000");
+                }
             }
 
             // Endpoint to check if the envelope is exists
@@ -43,9 +46,10 @@ namespace EfaturaFinalHandler
             var login = h.Login();
 
             var appRespResponse = new getAppRespResponseType();
-            if(appRespResponse.getResponse(document.fileName).applicationResponse !=  "ZARF ID BULUNAMADI")
+            var response = appRespResponse.getResponse(fileName);
+            if (response.applicationResponse !=  "ZARF ID BULUNAMADI")
             {
-                fault.throwResponse("2004");
+                fault.throwResponse("2001");
             }
             var ProcessModel = new InternalModel();
             // Call and use memory stream to store binary data on memory
@@ -59,32 +63,35 @@ namespace EfaturaFinalHandler
                         {
                             if(item.FullName.Split('.')[0] != fileName)
                             {
-                                fault.throwResponse("2004");
+                                fault.throwResponse("2000");
                             }
                             string archiveContent = string.Empty;
                             var zstream = new StreamReader(item.Open(), Encoding.UTF8);
                             string ztempstr = zstream.ReadToEnd();
 
                             // Read archive item as xml document
-                            XmlDocument xml = new XmlDocument();
-                            xml.Load(zstream);
-                            XmlNamespaceManager nsmgr = new XmlNamespaceManager(xml.NameTable);
-                            
-                            string xPathString = "//sh:InstanceIdentifier";
-                            XmlNode instanceIdentifier = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
-                            if(instanceIdentifier.InnerText != fileName)
+                            var xml = new XmlDocument();
+                            xml.LoadXml(ztempstr);
+                            var nsmgr = new XmlNamespaceManager(xml.NameTable);
+                            nsmgr.AddNamespace("sh", "http://www.unece.org/cefact/namespaces/StandardBusinessDocumentHeader");
+                            nsmgr.AddNamespace("cbc", "urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2");
+
+                            XmlNode instanceIdentifier;
+                            XmlElement root = xml.DocumentElement;
+                            instanceIdentifier = root.SelectSingleNode("//sh:InstanceIdentifier", nsmgr);
+                            var instanceIdentifierText = instanceIdentifier.InnerText;
+                            if (instanceIdentifierText != fileName)
                             {
                                 fault.throwResponse("2004");
                             }
 
                             // Get UUID from xml document
-                            xPathString = "//cbc:UUID";
-                            XmlNode uuid = xml.DocumentElement.SelectSingleNode(xPathString, nsmgr);
+                            XmlNode uuid = root.SelectSingleNode("//cbc:UUID", nsmgr);
 
                             // Check UUID if its valid
                             Guid parsedGuid = new Guid();
-                            
-                            if (!Guid.TryParse(uuid.InnerText, out parsedGuid))
+                            var parseResult = Guid.TryParse(uuid.InnerText, out parsedGuid);
+                            if (!parseResult)
                             {
                                 fault.throwResponse("2006");
                             }
@@ -101,20 +108,15 @@ namespace EfaturaFinalHandler
                 }
                 catch (Exception)
                 {
-                    fault.throwResponse("2004");
+                    fault.throwResponse("2006");
                 }
             }
 
-            var ServiceReturn = h.SaveIncomingFile(ProcessModel);
-            if(ServiceReturn.GetType()  != typeof(string))
-            {
-                return 1;
-            }
-            else
+            var send_file_response = h.SaveIncomingFile(ProcessModel);
+            if(send_file_response.status  != "ZARF KUYRUGA EKLENDI")
             {
                 fault.throwResponse("2005");
             }
-            return 0;
         }
     }
 }

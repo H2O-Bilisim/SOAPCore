@@ -51,6 +51,8 @@ namespace EfaturaFinalHandler.Models
                     }
                 }
             }
+            LogWriter log = new LogWriter();
+            log.Responscu(_getFaultResponse);
             throw new FaultException<EFaturaFault>(_getFaultResponse, reason: faultReason, code:faultCode, strCode);
         }
     }

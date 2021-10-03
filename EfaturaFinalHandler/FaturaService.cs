@@ -13,16 +13,23 @@ namespace EfaturaFinalHandler
             log.Requestci(document);
 
             DocumentController documentController = new DocumentController();
-            int validCode = documentController.ValidateDocument(document);
-
-            return new documentReturnType().getResponse(validCode);
+            documentController.ValidateDocument(document);
+            var response = new documentReturnType().getResponse();
+            log.Responscu(response);
+            return response;
         }
         public getAppRespResponse getApplicationResponse(getAppRespRequest instanceIdentifier)
         {
             LogWriter log = new LogWriter();
             log.Requestci(instanceIdentifier);
-
-            return new getAppRespResponseType().getResponse(instanceIdentifier.instanceIdentifier);
+            var response = new getAppRespResponseType().getResponse(instanceIdentifier.instanceIdentifier);
+            if (response.applicationResponse == "ZARF ID BULUNAMADI")
+            {
+                EFaturaFaultType fault = new EFaturaFaultType();
+                fault.throwResponse("2004");
+            }
+            log.Responscu(response);
+            return response;
         }
     }
 

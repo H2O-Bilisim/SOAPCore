@@ -73,6 +73,7 @@ namespace EfaturaFinalHandler
                 }
             });
             app.UseSoapEndpoint<EFatura>("/gibhandler.wsdl", new SoapEncoderOptions());
+            app.UseSoapEndpoint<EFatura>("/gibhandler", new SoapEncoderOptions());
             app.UseSoapEndpoint<EFatura>("/", new SoapEncoderOptions());
             
 

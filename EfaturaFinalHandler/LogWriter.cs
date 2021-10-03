@@ -27,8 +27,6 @@ namespace EfaturaFinalHandler
             string Path = @"ServiceLogs.txt";
             if (File.Exists(Path))
             {
-               
-
                 var WriteData = JsonConvert.SerializeObject(model);
                 using (StreamWriter sw = File.AppendText(Path))
                 {
@@ -42,8 +40,6 @@ namespace EfaturaFinalHandler
             string Path = @"RequestLog.txt";
             if (File.Exists(Path))
             {
-
-
                 var WriteData = JsonConvert.SerializeObject(model);
                 using (StreamWriter sw = File.AppendText(Path))
                 {
@@ -53,13 +49,11 @@ namespace EfaturaFinalHandler
             }
         }
 
-        public void Responscu(documentReturnType model)
+        public void Responscu(Object model)
         {
             string Path = @"ResponseLog.txt";
             if (File.Exists(Path))
             {
-
-
                 var WriteData = JsonConvert.SerializeObject(model);
                 using (StreamWriter sw = File.AppendText(Path))
                 {

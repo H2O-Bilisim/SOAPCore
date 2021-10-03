@@ -11,18 +11,15 @@ namespace EfaturaFinalHandler.Models
         public getAppRespResponseType() => _getAppRespResponse = new getAppRespResponse();
         public getAppRespResponse getResponse(string instanceIdentifier)
         {
+            var reqObj = new H2oServiceRequester();
+            
             getAppRespRequest request = new getAppRespRequest();
             request.instanceIdentifier = instanceIdentifier;
-
-            var reqObj = new H2oServiceRequester();
+            
             var service = reqObj.CheckIncomingEnvelope(request);
 
             _getAppRespResponse.applicationResponse = service.applicationResponse;
-            if (_getAppRespResponse.applicationResponse == "ZARF ID BULUNAMADI")
-            {
-                EFaturaFaultType fault = new EFaturaFaultType();
-                fault.throwResponse("2004");
-            }
+           
             return _getAppRespResponse;
         }
     }
